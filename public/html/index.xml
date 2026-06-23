@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>DevOps Учебник</title><link>http://89.208.32.130:8080/</link><description>Recent content on DevOps Учебник</description><generator>Hugo</generator><language>ru-ru</language><lastBuildDate>Wed, 17 Jun 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://89.208.32.130:8080/index.xml" rel="self" type="application/rss+xml"/><item><title>Неделя 1: Linux, Bash и первый сервер</title><link>http://89.208.32.130:8080/posts/01-linux-and-bash/</link><pubDate>Wed, 17 Jun 2026 00:00:00 +0000</pubDate><guid>http://89.208.32.130:8080/posts/01-linux-and-bash/</guid><description>&lt;h2 id="настройка-сервера"&gt;Настройка сервера&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Арендован сервер Debian 12, SSH на порту 19070, вход по ключу.&lt;/li&gt;
+&lt;li&gt;Настроен фаервол UFW.&lt;/li&gt;
+&lt;li&gt;Создан пользователь &lt;code&gt;devops&lt;/code&gt;, root-доступ отключён.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="первый-bash-скрипт"&gt;Первый Bash-скрипт&lt;/h2&gt;
+&lt;p&gt;Написан &lt;code&gt;cleanup.sh&lt;/code&gt; для ротации логов:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Оставляет последние N строк.&lt;/li&gt;
+&lt;li&gt;Архивирует старые строки в &lt;code&gt;.tar.gz&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Идемпотентный, работает с любыми логами.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="git-и-портфолио"&gt;Git и портфолио&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Код хранится в Git, репозиторий на GitHub.&lt;/li&gt;
+&lt;li&gt;Ссылка: &lt;a href="https://github.com/Vipman84/devops-portfolio"&gt;devops-portfolio&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</description></item></channel></rss>
