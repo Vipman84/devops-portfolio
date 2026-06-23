@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>{{ .Title }} – {{ .Site.Title }}</title></head>
+<body>
+<h1>{{ .Title }}</h1>
+<ul>
+{{ range .Pages }}
+  <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> — {{ .Date.Format "2006-01-02" }}</li>
+{{ end }}
+</ul>
+<a href="{{ .Site.Home.RelPermalink }}">← Назад</a>
+</body>
+</html>
