@@ -1,14 +1,12 @@
 name: Deploy site to production
-
 on:
   push:
     branches: [main]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
+      - name: Run deploy via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SSH_HOST }}
