@@ -60,8 +60,16 @@
         h2 { font-size: 1.6rem; margin-bottom: 1.2rem; }
         ul { list-style: none; padding-left: 0; }
         li { margin-bottom: 0.6rem; }
-        a { color: var(--accent2); text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        /* Улучшенные ссылки в карточках */
+        .glass-card a {
+            color: #f0f0f0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .glass-card a:hover {
+            text-decoration: underline;
+            color: #ffffff;
+        }
         .footer { text-align: center; padding: 2rem 0; opacity: 0.6; font-size: 0.9rem; }
         .btn {
             display: inline-block; background: linear-gradient(135deg, var(--accent), var(--accent2));
