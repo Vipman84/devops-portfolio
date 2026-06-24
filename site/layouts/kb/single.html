@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .Title }} – База знаний</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 700px; margin: 2em auto; padding: 0 1em; }
+        a { color: #0366d6; }
+        article { margin: 1em 0; }
+    </style>
+</head>
+<body>
+    <h1>{{ .Title }}</h1>
+    <article>{{ .Content }}</article>
+    <p><a href="/kb">← К списку статей</a></p>
+</body>
+</html>
