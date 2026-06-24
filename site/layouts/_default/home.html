@@ -3,20 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ .Title }}</title>
+    <title>{{ .Site.Title }}</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 700px; margin: 2em auto; padding: 0 1em; line-height: 1.6; }
-        a { color: #0366d6; }
+        :root {
+            --bg: #0b0c10;
+            --glass: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.08);
+            --text: #dcdcdc;
+            --accent: #6c63ff;
+            --accent2: #a5f0ff;
+            --card-hover: rgba(108,99,255,0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; margin-bottom: 2rem;
+        }
+        .logo {
+            font-size: 1.6rem; font-weight: 800;
+            background: linear-gradient(120deg, var(--accent2), var(--accent));
+            -webkit-background-clip: text; background-clip: text;
+            color: transparent;
+        }
+        .header-links { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+        .header-links a {
+            color: var(--text); text-decoration: none;
+            border-bottom: 1px solid transparent;
+        }
+        .header-links a:hover { border-color: var(--accent); }
+        .badge {
+            background: var(--glass); border: 1px solid var(--border);
+            padding: 6px 14px; border-radius: 40px;
+            color: #ffd966; font-weight: bold;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .hero {
+            text-align: center; padding: 2.5rem 1rem;
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 24px; margin-bottom: 2rem;
+        }
+        .hero h1 { font-size: 2.4rem; margin-bottom: 0.5rem; }
+        .hero p { font-size: 1.1rem; opacity: 0.8; }
+        .glass-card {
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 20px; padding: 2rem; margin-bottom: 2rem;
+            transition: background 0.2s;
+        }
+        .glass-card:hover { background: var(--card-hover); }
+        h2 { font-size: 1.6rem; margin-bottom: 1.2rem; }
+        ul { list-style: none; padding-left: 0; }
+        li { margin-bottom: 0.6rem; }
+        a { color: var(--accent2); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .footer { text-align: center; padding: 2rem 0; opacity: 0.6; font-size: 0.9rem; }
+        .btn {
+            display: inline-block; background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff; font-weight: bold; padding: 10px 24px; border-radius: 30px;
+            text-decoration: none; box-shadow: 0 4px 15px rgba(108,99,255,0.4);
+            transition: all 0.3s;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,99,255,0.6); }
     </style>
 </head>
 <body>
-    <h1>{{ .Title }}</h1>
+<div class="container">
+    <nav>
+        <div class="logo">⚡ DevOps Портфолио</div>
+        <div class="header-links">
+            <a href="/posts/">📖 Учебник</a>
+            <a href="/kb/">📚 База знаний</a>
+            <a href="https://github.com/Vipman84/devops-portfolio" target="_blank" class="badge">🐙 GitHub</a>
+        </div>
+    </nav>
+    <div class="hero">
+        <h1>Сергей Сорокин</h1>
+        <p>DevOps-инженер &bull; автоматизация &bull; Kubernetes &bull; мониторинг</p>
+        <p style="margin-top: 1.2rem;">
+            <a href="mailto:ivi@lyudi.org" class="badge">📧 ivi@lyudi.org</a>
+            <a href="https://vk.com/fx1358" target="_blank" class="badge">📱 VK</a>
+            <a href="https://devops.ai-donate.ru" class="btn">🌐 Портфолио</a>
+        </p>
+    </div>
 
-    <ul>
-    {{ range .Site.RegularPages }}
-        <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> — {{ .Date.Format "2006-01-02" }}</li>
-    {{ end }}
-    </ul>
+    <div class="glass-card">
+        <h2>📖 Учебник</h2>
+        <ul>
+            {{ range where .Site.RegularPages "Section" "posts" }}
+            <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> — {{ .Date.Format "2006-01-02" }}</li>
+            {{ end }}
+        </ul>
+    </div>
+
+    <div class="glass-card">
+        <h2>📚 База знаний</h2>
+        <ul>
+            {{ range where .Site.RegularPages "Section" "kb" }}
+            <li><a href="{{ .RelPermalink }}">{{ .Title }}</a> — {{ .Date.Format "2006-01-02" }}</li>
+            {{ end }}
+        </ul>
+    </div>
+
+    <div class="footer">
+        &copy; {{ now.Year }} Сергей Сорокин &bull; Проект DevOps Портфолио
+    </div>
+</div>
 </body>
 </html>
-<p><a href="/kb/">📚 База знаний</a></p>
