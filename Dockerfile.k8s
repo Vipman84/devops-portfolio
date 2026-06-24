@@ -1,0 +1,8 @@
+FROM hugomods/hugo:exts-non-root as builder
+USER root
+WORKDIR /src
+COPY site/ /src
+RUN hugo --minify
+
+FROM nginx:alpine
+COPY --from=builder /src/public /usr/share/nginx/html

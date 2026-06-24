@@ -11,3 +11,9 @@ Linux → Bash → Git → Docker → CI/CD → Caddy/HTTPS → Prometheus + Gra
 - Восстановление SSH (сервер 3)
 - Подмена символов в VNC
 - Старые job'ы в Grafana (очистка хранилища Prometheus)
+
+## Kubernetes (k3s)
+- Установлен k3s, создан systemd-сервис.
+- Собран Docker-образ учебника, импортирован в containerd.
+- Развёрнут Deployment и Service.
+- Решена проблема прав Hugo в контейнере (переход на root).

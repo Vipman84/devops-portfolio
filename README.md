@@ -36,3 +36,10 @@
 | Продакшен | 45.90.218.165 | 22 | root (ключ) | Сайт devops.ai-donate.ru, боты |
 | VPN/Сайт | 94.142.137.251 | 2222 | root (ключ) | VPN, ai-donate.ru |
 | Генератор статей | 185.252.146.188 | 22 | root (пароль/ключ) | Gigachat API, lyudi.org |
+
+## Kubernetes
+
+- На основном сервере развёрнут кластер **k3s** (v1.31.1).
+- Учебный сайт запущен в Kubernetes (Deployment, 2 реплики, Service ClusterIP).
+- Сборка образа автоматизирована через Dockerfile.
+- В будущем: Ingress, автоматический деплой в кластер из GitHub Actions.
