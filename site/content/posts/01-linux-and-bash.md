@@ -1,4 +1,3 @@
-markdown
 ---
 title: "Неделя 1: Linux, Bash и первый сервер"
 date: 2026-06-17
