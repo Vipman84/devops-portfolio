@@ -1,4 +1,49 @@
 ---
 title: "Прогнозы лотерей"
-layout: "lottery-predictions"
 ---
+{{ $data := dict }}
+{{ if fileExists "data/lottery_analysis.json" }}
+  {{ $data = readFile "data/lottery_analysis.json" | transform.Unmarshal }}
+{{ end }}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогнозы лотерей — devops.ai-donate.ru</title>
+    <style>
+        body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #334155; padding: 0.5rem; text-align: center; }
+        th { background: rgba(108,99,255,0.2); }
+    </style>
+</head>
+<body>
+    <h1>Прогнозы лотерей</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Лотерея</th>
+                <th>Тиражей</th>
+                <th>Горячие числа</th>
+                <th>Холодные числа</th>
+                <th>Прогноз</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $data }}
+            <tr>
+                <td>{{ .name }}</td>
+                <td>{{ .total_draws }}</td>
+                <td>{{ delimit .hot ", " }}</td>
+                <td>{{ delimit .cold ", " }}</td>
+                <td>{{ delimit .prediction ", " }}</td>
+            </tr>
+            {{ else }}
+            <tr><td colspan="5">Нет данных для отображения</td></tr>
+            {{ end }}
+        </tbody>
+    </table>
+    <p><em>Обновляется автоматически. Горячие числа — самые частые за всё время. Прогноз — горячие числа, исключая холодные.</em></p>
+</body>
+</html>
