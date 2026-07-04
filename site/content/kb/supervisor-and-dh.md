@@ -12,7 +12,7 @@ tags: ["автоматизация", "инструменты", "диспетче
 - Работает в фоне через `nohup`.
 
 ## DevOps Helper (dh)
-- Интерактивное меню (запуск без аргументов) или прямой вызов команд (`dh память`, `dh gitpush`).
+- Интерактивное меню или прямой вызов команд (`dh память`, `dh gitpush`).
 - Содержит разделы: серверы, сборщик, Git, AI, система.
-- Установка одной командой: `curl -sSL https://devops.ai-donate.ru/useful/dh/install.sh | bash`.
+- Установка одной командой: `curl -sSL https://devops.ai-donate.ru/install-dh.sh | bash`.
 - Made by Vipman84.
