@@ -2,16 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{{ .Title }} – База знаний</title>
+    <title>{{ .Title }} — devops.ai-donate.ru</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 700px; margin: 2em auto; padding: 0 1em; }
-        a { color: #0366d6; }
-        article { margin: 1em 0; }
+        body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        a { color: #a5f0ff; }
     </style>
 </head>
 <body>
+    <a href="/kb/">← Назад к базе знаний</a>
     <h1>{{ .Title }}</h1>
-    <article>{{ .Content }}</article>
-    <p><a href="/kb">← К списку статей</a></p>
+    {{ .Content }}
 </body>
 </html>
