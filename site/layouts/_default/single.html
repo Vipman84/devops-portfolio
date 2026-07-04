@@ -2,39 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ .Title }} – {{ .Site.Title }}</title>
+    <title>{{ .Title }} — devops.ai-donate.ru</title>
     <style>
-        :root {
-            --bg: #0b0c10; --glass: rgba(255,255,255,0.05);
-            --border: rgba(255,255,255,0.08); --text: #dcdcdc;
-            --accent: #6c63ff; --accent2: #a5f0ff;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            line-height: 1.6;
-        }
-        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
-        nav { margin-bottom: 2rem; }
-        nav a { color: var(--accent2); text-decoration: none; }
-        article {
-            background: var(--glass); border: 1px solid var(--border);
-            border-radius: 20px; padding: 2rem;
-        }
-        h1 { margin-bottom: 1rem; }
-        .back { display: inline-block; margin-top: 1.5rem; }
+        body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        a { color: #a5f0ff; }
     </style>
 </head>
 <body>
-<div class="container">
-    <nav><a href="/">← На главную</a></nav>
-    <article>
-        <h1>{{ .Title }}</h1>
-        {{ .Content }}
-    </article>
-    <a href="/" class="back">← На главную</a>
-</div>
+    <a href="/">← На главную</a>
+    <h1>{{ .Title }}</h1>
+    {{ .Content }}
 </body>
 </html>
