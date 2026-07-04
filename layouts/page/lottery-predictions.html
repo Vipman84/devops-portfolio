@@ -1,0 +1,60 @@
+{{ $data := dict }}
+{{ $jsonPath := "assets/lottery_predictions.json" }}
+{{ if fileExists $jsonPath }}
+  {{ $data = readFile $jsonPath | transform.Unmarshal }}
+{{ end }}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогнозы лотерей — ai-donate.ru</title>
+    <style>
+        body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #334155; padding: 0.5rem; text-align: center; }
+        th { background: rgba(108,99,255,0.2); }
+        .matched { color: #4ade80; }
+    </style>
+</head>
+<body>
+    <h1>Прогнозы лотерей на {{ $data.generated_at | time.Format "02.01.2006 15:04" }}</h1>
+    {{ if $data.lotteries }}
+    <table>
+        <thead>
+            <tr>
+                <th>Лотерея</th>
+                <th>Цена</th>
+                <th>Последний тираж</th>
+                <th>Результат</th>
+                <th>Следующий тираж</th>
+                <th>Прогноз</th>
+                <th>Совпадений с прошлым прогнозом</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $data.lotteries }}
+            <tr>
+                <td>{{ .name }}</td>
+                <td>{{ .ticket_price }} ₽</td>
+                <td>{{ .last_draw.draw_date | time.Format "15:04" }} ({{ .last_draw.draw_number }})</td>
+                <td>{{ delimit .last_draw.numbers ", " }}</td>
+                <td>{{ .next_draw.draw_date | time.Format "15:04" }}</td>
+                <td>{{ delimit .next_draw.predicted_numbers ", " }}</td>
+                <td>
+                    {{ if gt .previous_prediction.match_percent 0 }}
+                        <span class="matched">{{ .previous_prediction.match_percent }}% ({{ delimit .previous_prediction.matched_numbers ", " }})</span>
+                    {{ else }}
+                        —
+                    {{ end }}
+                </td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    {{ else }}
+        <p>Пока нет прогнозов. Ожидайте обновления данных.</p>
+    {{ end }}
+    <p><em>Прогнозы обновляются каждые 30 минут.</em></p>
+</body>
+</html>

@@ -1,0 +1,180 @@
+{
+  "generated_at": "2026-07-04T18:27:53.307659+00:00",
+  "lotteries": [
+    {
+      "id": 101121,
+      "name": "12 добрых дел",
+      "ticket_price": 200,
+      "last_draw": {
+        "draw_number": "002511",
+        "draw_date": "2026-07-04T15:48:00+00:00",
+        "numbers": [
+          4,
+          14,
+          16,
+          24,
+          20,
+          12,
+          21,
+          2,
+          1,
+          5,
+          23,
+          10
+        ]
+      },
+      "next_draw": {
+        "draw_date": "2026-07-04T18:00:00",
+        "predicted_numbers": [
+          1,
+          2,
+          6,
+          11,
+          12,
+          14,
+          15,
+          16,
+          18,
+          21,
+          22,
+          24
+        ]
+      },
+      "previous_prediction": {
+        "predicted_numbers": [],
+        "matched": 0,
+        "match_percent": 0,
+        "matched_numbers": []
+      }
+    },
+    {
+      "id": 102091,
+      "name": "Трижды три",
+      "ticket_price": 15,
+      "last_draw": {
+        "draw_number": "037188",
+        "draw_date": "2026-05-26T23:45:00+00:00",
+        "numbers": [
+          3,
+          8,
+          21,
+          29,
+          15,
+          16,
+          28,
+          17,
+          26,
+          5,
+          1,
+          10
+        ]
+      },
+      "next_draw": {
+        "draw_date": "2026-07-04T18:00:00",
+        "predicted_numbers": [
+          1,
+          2,
+          4,
+          5,
+          12,
+          13,
+          16,
+          19,
+          21,
+          23,
+          25,
+          29
+        ]
+      },
+      "previous_prediction": {
+        "predicted_numbers": [],
+        "matched": 0,
+        "match_percent": 0,
+        "matched_numbers": []
+      }
+    },
+    {
+      "id": 104041,
+      "name": "Топ 12",
+      "ticket_price": 50,
+      "last_draw": {
+        "draw_number": "040313",
+        "draw_date": "2026-07-04T19:54:00+00:00",
+        "numbers": [
+          19,
+          5,
+          2,
+          15,
+          21,
+          23,
+          22,
+          7,
+          8,
+          10,
+          12,
+          17
+        ]
+      },
+      "next_draw": {
+        "draw_date": "2026-07-04T18:00:00",
+        "predicted_numbers": [
+          2,
+          4,
+          6,
+          10,
+          13,
+          14,
+          15,
+          17,
+          19,
+          20,
+          23,
+          24
+        ]
+      },
+      "previous_prediction": {
+        "predicted_numbers": [],
+        "matched": 0,
+        "match_percent": 0,
+        "matched_numbers": []
+      }
+    },
+    {
+      "id": 105011,
+      "name": "Турнир",
+      "ticket_price": 500,
+      "last_draw": {
+        "draw_number": "038591",
+        "draw_date": "2026-07-04T19:42:00+00:00",
+        "numbers": [
+          0,
+          2,
+          1,
+          1,
+          2,
+          0,
+          0,
+          1,
+          0,
+          2,
+          1,
+          1
+        ]
+      },
+      "next_draw": {
+        "draw_date": "2026-07-04T18:00:00",
+        "predicted_numbers": [
+          0,
+          1,
+          2
+        ]
+      },
+      "previous_prediction": {
+        "predicted_numbers": [],
+        "matched": 0,
+        "match_percent": 0,
+        "matched_numbers": []
+      }
+    }
+  ]
+}
