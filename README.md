@@ -43,3 +43,7 @@
 - Учебный сайт запущен в Kubernetes (Deployment, 2 реплики, Service ClusterIP).
 - Сборка образа автоматизирована через Dockerfile.
 - В будущем: Ingress, автоматический деплой в кластер из GitHub Actions.
+
+## Инструменты
+- [DevOps Helper (dh)](https://devops.ai-donate.ru/useful/dh/) — интерактивный консольный помощник для Debian/Ubuntu.
+- supervisor.py — автономный диспетчер для управления сборщиком тиражей (проверка доступности, автоперезапуск, досбор JSON‑метаданных).
