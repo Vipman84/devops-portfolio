@@ -1,8 +1,6 @@
 #!/bin/bash
-# ===================================================================
-#  DevOps Helper (dh) — интерактивный справочник команд Debian/Ubuntu
-#  Made by Vipman84  |  https://devops.ai-donate.ru
-# ===================================================================
+# DevOps Helper (dh) – Made by Vipman84
+# Интерактивный помощник для Debian/Ubuntu
 
 set -o pipefail
 
@@ -29,7 +27,7 @@ main_menu() {
     echo "+========================================+"
     echo "|        $TITLE           |"
     echo "+========================================+"
-    echo "|  1. Файлы и каталоги (УМНЫЙ)          |"
+    echo "|  1. Файлы и каталоги                  |"
     echo "|  2. Поиск и фильтрация                |"
     echo "|  3. Права и владельцы                 |"
     echo "|  4. Архивация и сжатие                |"
@@ -49,7 +47,7 @@ main_menu() {
     echo "+========================================+"
 }
 
-# ================== УМНЫЙ РАЗДЕЛ «ФАЙЛЫ И КАТАЛОГИ» ==================
+# ================== 1. ФАЙЛЫ И КАТАЛОГИ (умный) ==================
 section_files() {
     while true; do
         clear
@@ -59,7 +57,7 @@ section_files() {
         echo " 3. Перейти в другую папку"
         echo " 4. Создать файл или папку"
         echo " 5. Удалить файл или папку"
-        echo " 0. Назад"
+        echo " 0. $BACK"
         read -p "Выберите действие: " choice
         case $choice in
             1) browse_directory ;;
@@ -68,7 +66,7 @@ section_files() {
             4) create_item ;;
             5) delete_item ;;
             0) break ;;
-            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
+            *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
     done
 }
@@ -76,9 +74,7 @@ section_files() {
 browse_directory() {
     local dir="${1:-$(pwd)}"
     clear
-    echo "=== Содержимое каталога: $dir ==="
-    echo ""
-    # Показываем содержимое с номерами
+    echo "=== Содержимое: $dir ==="
     local i=1
     declare -A items
     while IFS= read -r item; do
@@ -91,9 +87,8 @@ browse_directory() {
         ((i++))
     done < <(ls -1A "$dir" 2>/dev/null)
     echo ""
-    echo "Введите номер для действия (0 - выход, .. - вверх):"
-    read -p "> " num
-    
+    echo "0 – выход, .. – вверх"
+    read -p "Номер: " num
     if [ "$num" = "0" ]; then
         return
     elif [ "$num" = ".." ]; then
@@ -106,8 +101,7 @@ browse_directory() {
             show_file_actions "$target"
         fi
     else
-        echo "Неверный номер"
-        read -p "Нажмите Enter..."
+        echo "Неверный номер"; read -p "$PRESS_ENTER"
         browse_directory "$dir"
     fi
 }
@@ -116,45 +110,37 @@ show_file_actions() {
     local file="$1"
     clear
     echo "Файл: $file"
-    echo "Размер: $(stat -c%s "$file") байт"
-    echo "Права: $(stat -c%a "$file")"
-    echo ""
+    echo "Размер: $(stat -c%s "$file" 2>/dev/null || echo '?') байт"
     echo " 1. Просмотреть (первые 20 строк)"
     echo " 2. Редактировать (nano)"
     echo " 3. Копировать в..."
     echo " 4. Переместить в..."
     echo " 0. Назад"
-    read -p "Выберите действие: " action
-    case $action in
-        1) head -20 "$file"; echo "..."; read -p "Нажмите Enter..." ;;
+    read -p "Действие: " act
+    case $act in
+        1) head -20 "$file"; echo "..."; read -p "$PRESS_ENTER" ;;
         2) nano "$file" ;;
-        3) read -p "Куда скопировать: " dest; cp -v "$file" "$dest"; read -p "Нажмите Enter..." ;;
-        4) read -p "Куда переместить: " dest; mv -v "$file" "$dest"; read -p "Нажмите Enter..." ;;
+        3) read -p "Куда: " d; cp -v "$file" "$d"; read -p "$PRESS_ENTER" ;;
+        4) read -p "Куда: " d; mv -v "$file" "$d"; read -p "$PRESS_ENTER" ;;
     esac
 }
 
 search_files() {
     clear
-    echo "--- Поиск файлов ---"
-    read -p "Введите имя или часть имени файла: " pattern
-    echo "Ищем файлы по шаблону **..."
-    echo ""
+    read -p "Имя или часть имени файла: " pattern
+    echo "Ищем '*$pattern*' по всей системе (до 20 результатов)..."
     local results=$(find / -name "*$pattern*" -type f 2>/dev/null | head -20)
     if [ -z "$results" ]; then
-        echo "Ничего не найдено."
-        read -p "Нажмите Enter..."
-        return
+        echo "Ничего не найдено."; read -p "$PRESS_ENTER"; return
     fi
-    
     local i=1
     declare -A found
-    while IFS= read -r file; do
-        echo "  [$i] $file"
-        found[$i]="$file"
+    while IFS= read -r f; do
+        echo "  [$i] $f"
+        found[$i]="$f"
         ((i++))
     done <<< "$results"
-    echo ""
-    read -p "Выберите номер для просмотра (0 - отмена): " num
+    read -p "Номер для просмотра (0 – отмена): " num
     if [ "$num" -gt 0 ] && [ -n "${found[$num]}" ]; then
         show_file_actions "${found[$num]}"
     fi
@@ -162,423 +148,325 @@ search_files() {
 
 change_directory() {
     clear
-    echo "--- Смена каталога ---"
     echo "Текущий каталог: $(pwd)"
     echo ""
-    echo "Часто используемые каталоги:"
-    echo "  /home       - домашние папки пользователей"
-    echo "  /var/log    - системные логи"
-    echo "  /etc        - конфигурационные файлы"
-    echo "  /tmp        - временные файлы"
-    echo "  /opt        - дополнительное ПО"
-    echo ""
-    echo " 1. Выбрать из списка выше"
+    echo "Часто используемые:"
+    echo "  /home, /var/log, /etc, /tmp, /opt"
+    echo " 1. Выбрать из списка"
     echo " 2. Ввести путь вручную"
     echo " 0. Отмена"
-    read -p "Выбор: " choice
-    
-    case $choice in
-        1) read -p "Введите номер каталога из списка: " dir_choice
-           case $dir_choice in
-               /home) cd /home ;;
-               /var/log) cd /var/log ;;
-               /etc) cd /etc ;;
-               /tmp) cd /tmp ;;
-               /opt) cd /opt ;;
-               *) echo "Неверный каталог"; read -p "Нажмите Enter..."; return ;;
-           esac
-           browse_directory "$(pwd)" ;;
-        2) read -p "Введите путь: " new_path
-           if [ -d "$new_path" ]; then
-               cd "$new_path" && echo "Перешли в $(pwd)"
-               browse_directory "$(pwd)"
-           else
-               echo "Каталог не существует"
-               read -p "Нажмите Enter..."
-           fi ;;
+    read -p "Выбор: " c
+    case $c in
+        1) read -p "Каталог: " d; [ -d "$d" ] && cd "$d" && browse_directory "$(pwd)" || echo "Не существует"; read -p "$PRESS_ENTER" ;;
+        2) read -p "Путь: " p; [ -d "$p" ] && cd "$p" && browse_directory "$(pwd)" || echo "Не существует"; read -p "$PRESS_ENTER" ;;
     esac
+}
+
+create_item() {
+    clear
+    echo "1 – файл, 2 – каталог"
+    read -p "Тип: " t
+    read -p "Имя: " n
+    case $t in 1) touch "$n" && echo "Файл $n создан";; 2) mkdir -p "$n" && echo "Каталог $n создан";; *) echo "Неверно";; esac
+    read -p "$PRESS_ENTER"
 }
 
 delete_item() {
     clear
-    echo "--- Удаление файла или папки ---"
-    read -p "Введите путь к файлу/папке для удаления: " target
-    if [ -e "$target" ]; then
-        echo "Вы уверены, что хотите удалить ? (да/нет)"
-        read -p "> " confirm
-        if [ "$confirm" = "да" ]; then
-            rm -rf "$target" && echo "Удалено" || echo "Ошибка при удалении"
-        else
-            echo "Отменено"
-        fi
-    else
-        echo "Файл или папка не найдены"
-    fi
-    read -p "Нажмите Enter..."
-}
-
-smart_find() {
-    local type="$1"
-    local type_flag="$2"
-    local start_dir="/"
-    
-    read -p "Начальный каталог (по умолчанию /): " start_dir
-    start_dir="${start_dir:-/}"
-    read -p "Маска имени (например, *.log): " mask
-    mask="${mask:-*}"
-
-    echo "Поиск $type в $start_dir по маске '$mask'..."
-    local results
-    results=$(find "$start_dir" -type "$type_flag" -name "$mask" 2>/dev/null | head -20)
-    
-    if [ -z "$results" ]; then
-        echo "Ничего не найдено."
-        read -p "$PRESS_ENTER"
-        return
-    fi
-
-    local IFS=$'\n'
-    local -a arr=($results)
-    for i in "${!arr[@]}"; do
-        printf "%3d. %s\n" $((i+1)) "${arr[$i]}"
-    done
-
-    read -p "Выберите номер (0 – отмена): " num
-    if [ "$num" -gt 0 ] && [ "$num" -le "${#arr[@]}" ]; then
-        local target="${arr[$((num-1))]}"
-        echo "Выбран: $target"
-        echo " 1. Просмотреть (cat)"
-        echo " 2. Редактировать (nano)"
-        echo " 3. Копировать в..."
-        echo " 4. Удалить"
-        echo " 5. Архивировать (tar.gz)"
-        echo " 0. Отмена"
-        read -p "Действие: " act
-        case $act in
-            1) cat "$target" | less ;;
-            2) nano "$target" ;;
-            3) read -p "Куда скопировать: " dest; cp -v "$target" "$dest" ;;
-            4) rm -iv "$target" ;;
-            5) tar -czf "${target}.tar.gz" "$target" && echo "Архив создан: ${target}.tar.gz" ;;
-            0) return ;;
-            *) echo "Неверное действие" ;;
-        esac
-    fi
+    read -p "Путь к файлу/папке: " target
+    [ -e "$target" ] || { echo "Не найдено"; read -p "$PRESS_ENTER"; return; }
+    read -p "Удалить '$target'? (да/нет): " c
+    [ "$c" = "да" ] && rm -rf "$target" && echo "Удалено" || echo "Отменено"
     read -p "$PRESS_ENTER"
 }
 
-quick_cd() {
-    read -p "Введите путь: " newdir
-    if [ -d "$newdir" ]; then
-        cd "$newdir" && echo "Текущий каталог: $(pwd)"
-    else
-        echo "Каталог не существует."
-    fi
-    read -p "$PRESS_ENTER"
-}
-
-create_item() {
-    echo "Создать: 1 – файл, 2 – каталог"
-    read -p "Выбор: " ctype
-    read -p "Имя: " name
-    case $ctype in
-        1) touch "$name" && echo "Файл $name создан" ;;
-        2) mkdir -p "$name" && echo "Каталог $name создан" ;;
-        *) echo "Неверный выбор" ;;
-    esac
-    read -p "$PRESS_ENTER"
-}
-
-# ================== ОСТАЛЬНЫЕ РАЗДЕЛЫ (без изменений) ==================
+# ================== 2. ПОИСК И ФИЛЬТРАЦИЯ ==================
 section_search() {
     while true; do
         clear
         echo "--- Поиск и фильтрация ---"
-        echo " 1. grep <слово> <файл>"
-        echo " 2. grep -r <слово> <папка>"
-        echo " 3. find . -name ..."
-        echo " 4. find . -mtime -7"
-        echo " 5. find . -size +10M"
+        echo " 1. Найти строку в файле"
+        echo " 2. Найти строку в файлах каталога"
+        echo " 3. Найти файлы по имени"
+        echo " 4. Найти файлы, изменённые за 7 дней"
+        echo " 5. Найти файлы больше 10 МБ"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) read -p "Слово: " w; read -p "Файл: " f; grep --color "$w" "$f" ;;
-            2) read -p "Слово: " w; read -p "Папка: " d; grep -rn "$w" "$d" ;;
-            3) read -p "Шаблон: " n; find / -name "$n" 2>/dev/null ;;
-            4) find / -mtime -7 2>/dev/null | head -20 ;;
-            5) find / -size +10M 2>/dev/null | head -20 ;;
+            1) read -p "Строка: " s; read -p "Файл: " f; grep --color "$s" "$f" || echo "Не найдено"; read -p "$PRESS_ENTER" ;;
+            2) read -p "Строка: " s; read -p "Каталог: " d; grep -rn "$s" "$d" || echo "Не найдено"; read -p "$PRESS_ENTER" ;;
+            3) search_files ;;
+            4) find / -mtime -7 2>/dev/null | head -20; read -p "$PRESS_ENTER" ;;
+            5) find / -size +10M 2>/dev/null | head -20; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 3. ПРАВА ==================
 section_perms() {
     while true; do
         clear
         echo "--- Права и владельцы ---"
-        echo " 1. chmod +x <файл>"
-        echo " 2. chmod 755 <файл>"
-        echo " 3. chown user:group <ф>"
-        echo " 4. ls -l"
+        echo " 1. Показать права (ls -l)"
+        echo " 2. Сделать исполняемым (chmod +x)"
+        echo " 3. Установить права 755"
+        echo " 4. Сменить владельца (chown)"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) read -p "Файл: " f; chmod +x "$f"; ls -l "$f" ;;
-            2) read -p "Файл: " f; chmod 755 "$f"; ls -l "$f" ;;
-            3) read -p "Файл: " f; read -p "Владелец:группа: " o; chown "$o" "$f"; ls -l "$f" ;;
-            4) ls -l ;;
+            1) ls -la; read -p "$PRESS_ENTER" ;;
+            2) read -p "Файл: " f; chmod +x "$f" 2>/dev/null && echo "Готово" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            3) read -p "Файл/папка: " f; chmod 755 "$f" 2>/dev/null && echo "Готово" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            4) read -p "Файл/папка: " f; read -p "Владелец:группа: " o; chown "$o" "$f" 2>/dev/null && echo "Готово" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 4. АРХИВАЦИЯ ==================
 section_archive() {
     while true; do
         clear
         echo "--- Архивация и сжатие ---"
-        echo " 1. tar -czf архив.tar.gz папка/"
-        echo " 2. tar -xzf архив.tar.gz"
-        echo " 3. zip -r архив.zip папка/"
-        echo " 4. unzip архив.zip"
+        echo " 1. Создать tar.gz"
+        echo " 2. Распаковать tar.gz"
+        echo " 3. Создать zip"
+        echo " 4. Распаковать zip"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) read -p "Имя архива.tar.gz: " a; read -p "Папка: " d; tar -czf "$a" "$d" ;;
-            2) read -p "Архив.tar.gz: " a; tar -xzf "$a" ;;
-            3) read -p "Имя архива.zip: " a; read -p "Папка: " d; zip -r "$a" "$d" ;;
-            4) read -p "Архив.zip: " a; unzip "$a" ;;
+            1) read -p "Имя архива.tar.gz: " a; read -p "Папка: " d; tar -czf "$a" "$d" && echo "Архив создан" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            2) read -p "Архив.tar.gz: " a; tar -xzf "$a" && echo "Распакован" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            3) read -p "Имя архива.zip: " a; read -p "Папка: " d; zip -r "$a" "$d" && echo "Архив создан" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            4) read -p "Архив.zip: " a; unzip "$a" && echo "Распакован" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 5. СЕТЬ ==================
 section_network() {
     while true; do
         clear
         echo "--- Сеть и диагностика ---"
-        echo " 1. ip a"
-        echo " 2. ping <хост>"
-        echo " 3. ss -tlnp"
-        echo " 4. curl -I <url>"
-        echo " 5. traceroute <хост>"
-        echo " 6. nslookup <домен>"
+        echo " 1. Показать IP-адреса"
+        echo " 2. Ping"
+        echo " 3. Открытые порты"
+        echo " 4. Проверить HTTP-заголовки"
+        echo " 5. Трассировка (traceroute)"
+        echo " 6. DNS-запрос (nslookup)"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) ip -br addr ;;
-            2) read -p "Хост: " h; ping -c 4 "$h" ;;
-            3) ss -tlnp ;;
-            4) read -p "URL: " u; curl -I "$u" ;;
-            5) read -p "Хост: " h; traceroute "$h" 2>/dev/null || echo "traceroute не установлен" ;;
-            6) read -p "Домен: " d; nslookup "$d" 2>/dev/null || echo "nslookup не установлен" ;;
+            1) ip -br addr; read -p "$PRESS_ENTER" ;;
+            2) read -p "Хост: " h; ping -c 4 "$h"; read -p "$PRESS_ENTER" ;;
+            3) ss -tlnp; read -p "$PRESS_ENTER" ;;
+            4) read -p "URL: " u; curl -I "$u" 2>/dev/null || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            5) read -p "Хост: " h; traceroute "$h" 2>/dev/null || echo "Не установлен"; read -p "$PRESS_ENTER" ;;
+            6) read -p "Домен: " d; nslookup "$d" 2>/dev/null || echo "Не установлен"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 6. ПРОЦЕССЫ ==================
 section_processes() {
     while true; do
         clear
         echo "--- Процессы и службы ---"
-        echo " 1. top -n 1"
-        echo " 2. ps aux"
-        echo " 3. kill <PID>"
-        echo " 4. systemctl status"
-        echo " 5. journalctl -u <svc>"
+        echo " 1. Список процессов"
+        echo " 2. Завершить процесс по PID"
+        echo " 3. Статус службы"
+        echo " 4. Перезапустить службу"
+        echo " 5. Логи службы (последние 20 строк)"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) top -n 1 ;;
-            2) ps aux | head -20 ;;
-            3) read -p "PID: " p; kill "$p" ;;
-            4) read -p "Служба: " s; systemctl status "$s" ;;
-            5) read -p "Служба: " s; journalctl -u "$s" --no-pager -n 20 ;;
+            1) ps aux | head -20; read -p "$PRESS_ENTER" ;;
+            2) read -p "PID: " p; kill "$p" 2>/dev/null && echo "Сигнал отправлен" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            3) read -p "Служба: " s; systemctl status "$s" 2>/dev/null || echo "Не найдена"; read -p "$PRESS_ENTER" ;;
+            4) read -p "Служба: " s; sudo systemctl restart "$s" 2>/dev/null && echo "Перезапущена" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            5) read -p "Служба: " s; journalctl -u "$s" --no-pager -n 20 2>/dev/null || echo "Не найдена"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 7. ПАМЯТЬ / ДИСК ==================
 section_resources() {
     while true; do
         clear
         echo "--- Память / диск / загрузка ---"
-        echo " 1. free -h"
-        echo " 2. df -h"
-        echo " 3. du -sh <папка>"
-        echo " 4. uptime"
-        echo " 5. uname -a"
+        echo " 1. Свободная память"
+        echo " 2. Свободное место на дисках"
+        echo " 3. Размер папки"
+        echo " 4. Время работы"
+        echo " 5. Версия ядра"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) free -h ;;
-            2) df -h ;;
-            3) read -p "Папка: " d; du -sh "$d" ;;
-            4) uptime ;;
-            5) uname -a ;;
+            1) free -h; read -p "$PRESS_ENTER" ;;
+            2) df -h; read -p "$PRESS_ENTER" ;;
+            3) read -p "Папка: " d; du -sh "$d" 2>/dev/null || echo "Не найдена"; read -p "$PRESS_ENTER" ;;
+            4) uptime; read -p "$PRESS_ENTER" ;;
+            5) uname -a; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 8. ПОЛЬЗОВАТЕЛИ ==================
 section_users() {
     while true; do
         clear
         echo "--- Пользователи и группы ---"
-        echo " 1. whoami"
-        echo " 2. id"
-        echo " 3. cat /etc/passwd"
-        echo " 4. useradd / userdel"
-        echo " 5. passwd"
+        echo " 1. Кто я?"
+        echo " 2. Мои группы"
+        echo " 3. Список пользователей"
+        echo " 4. Добавить пользователя"
+        echo " 5. Удалить пользователя"
+        echo " 6. Сменить пароль"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) whoami ;;
-            2) id ;;
-            3) cat /etc/passwd ;;
-            4) read -p "Добавить (a) или удалить (d): " act; read -p "Имя: " u
-               [[ "$act" == "a" ]] && sudo useradd -m "$u" || sudo userdel "$u" ;;
-            5) passwd ;;
+            1) whoami; read -p "$PRESS_ENTER" ;;
+            2) id; read -p "$PRESS_ENTER" ;;
+            3) cat /etc/passwd; read -p "$PRESS_ENTER" ;;
+            4) read -p "Имя: " u; sudo useradd -m "$u" && echo "Добавлен" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            5) read -p "Имя: " u; sudo userdel "$u" && echo "Удалён" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            6) passwd; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 9. SSH ==================
 section_ssh() {
     while true; do
         clear
         echo "--- SSH и удалённая работа ---"
-        echo " 1. ssh user@host"
-        echo " 2. ssh-keygen"
-        echo " 3. ssh-copy-id"
-        echo " 4. scp файл user@host:"
+        echo " 1. Подключиться"
+        echo " 2. Создать SSH-ключ"
+        echo " 3. Скопировать ключ на сервер"
+        echo " 4. Передать файл (scp)"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) read -p "Строка подключения: " conn; ssh $conn ;;
-            2) ssh-keygen -t ed25519 ;;
-            3) read -p "Строка: " conn; ssh-copy-id $conn ;;
-            4) read -p "Файл: " f; read -p "Куда: " dest; scp "$f" "$dest" ;;
+            1) read -p "user@host: " conn; ssh $conn;;
+            2) ssh-keygen -t ed25519; read -p "$PRESS_ENTER" ;;
+            3) read -p "user@host: " conn; ssh-copy-id $conn; read -p "$PRESS_ENTER" ;;
+            4) read -p "Файл: " f; read -p "user@host:путь: " dest; scp "$f" "$dest"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 10. APT ==================
 section_apt() {
     while true; do
         clear
         echo "--- Установка пакетов (apt) ---"
-        echo " 1. apt update"
-        echo " 2. apt upgrade"
-        echo " 3. apt install <пакет>"
-        echo " 4. apt remove <пакет>"
-        echo " 5. apt search <слово>"
+        echo " 1. Обновить список пакетов"
+        echo " 2. Обновить систему"
+        echo " 3. Установить пакет"
+        echo " 4. Удалить пакет"
+        echo " 5. Поиск пакета"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) sudo apt update ;;
-            2) sudo apt upgrade -y ;;
-            3) read -p "Пакет: " p; sudo apt install -y "$p" ;;
-            4) read -p "Пакет: " p; sudo apt remove -y "$p" ;;
-            5) read -p "Слово: " w; apt search "$w" ;;
+            1) sudo apt update; read -p "$PRESS_ENTER" ;;
+            2) sudo apt upgrade -y; read -p "$PRESS_ENTER" ;;
+            3) read -p "Пакет: " p; sudo apt install -y "$p"; read -p "$PRESS_ENTER" ;;
+            4) read -p "Пакет: " p; sudo apt remove -y "$p"; read -p "$PRESS_ENTER" ;;
+            5) read -p "Ключевое слово: " w; apt search "$w"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 11. GIT ==================
 section_git() {
     while true; do
         clear
         echo "--- Git – шпаргалка ---"
-        echo " 1. git status"
-        echo " 2. git add -A && git commit -m '...' && git push"
-        echo " 3. git log --oneline"
-        echo " 4. git pull / git clone <url>"
-        echo " 5. git branch / git checkout"
+        echo " 1. Статус репозитория"
+        echo " 2. Быстрый коммит и пуш"
+        echo " 3. Лог коммитов"
+        echo " 4. Клонировать репозиторий"
+        echo " 5. Создать ветку"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) git status ;;
-            2) read -p "Сообщение: " m; git add -A; git commit -m "$m"; git push ;;
-            3) git log --oneline -10 ;;
-            4) read -p "pull (p) или clone (c): " act
-               [[ "$act" == "c" ]] && read -p "URL: " u && git clone "$u" || git pull ;;
-            5) read -p "branch / checkout / new: " act
-               [[ "$act" == "new" ]] && read -p "Имя ветки: " b && git checkout -b "$b"
-               [[ "$act" == "checkout" ]] && read -p "Ветка: " b && git checkout "$b"
-               [[ "$act" == "branch" ]] && git branch ;;
+            1) git status; read -p "$PRESS_ENTER" ;;
+            2) read -p "Сообщение: " m; git add -A; git commit -m "$m"; git push; read -p "$PRESS_ENTER" ;;
+            3) git log --oneline -10; read -p "$PRESS_ENTER" ;;
+            4) read -p "URL: " u; git clone "$u"; read -p "$PRESS_ENTER" ;;
+            5) read -p "Имя ветки: " b; git checkout -b "$b"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 12. DOCKER ==================
 section_docker() {
     while true; do
         clear
         echo "--- Docker – шпаргалка ---"
-        echo " 1. docker ps"
-        echo " 2. docker images"
-        echo " 3. docker run / start / stop"
-        echo " 4. docker build -t имя ."
-        echo " 5. docker exec -it <конт> bash"
+        echo " 1. Запущенные контейнеры"
+        echo " 2. Все контейнеры"
+        echo " 3. Образы"
+        echo " 4. Запустить контейнер"
+        echo " 5. Остановить контейнер"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) docker ps -a ;;
-            2) docker images ;;
-            3) read -p "Действие (run/start/stop): " act; read -p "Контейнер: " n; docker $act $n ;;
-            4) read -p "Имя образа: " img; docker build -t "$img" . ;;
-            5) read -p "Контейнер: " n; docker exec -it "$n" bash ;;
+            1) docker ps; read -p "$PRESS_ENTER" ;;
+            2) docker ps -a; read -p "$PRESS_ENTER" ;;
+            3) docker images; read -p "$PRESS_ENTER" ;;
+            4) read -p "Имя образа: " img; read -p "Имя контейнера: " n; docker run -d --name "$n" "$img"; read -p "$PRESS_ENTER" ;;
+            5) read -p "Контейнер: " n; docker stop "$n"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 13. PYTHON ==================
 section_python() {
     while true; do
         clear
         echo "--- Python / pip – быстрый старт ---"
-        echo " 1. python3 --version"
-        echo " 2. pip list"
-        echo " 3. pip install <пакет>"
-        echo " 4. python3 -m venv venv"
-        echo " 5. source venv/bin/activate"
+        echo " 1. Версия Python"
+        echo " 2. Список пакетов (pip)"
+        echo " 3. Установить пакет"
+        echo " 4. Создать виртуальное окружение"
+        echo " 5. Активировать окружение"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) python3 --version ;;
-            2) pip list 2>/dev/null || echo "pip не установлен" ;;
-            3) read -p "Пакет: " p; pip install "$p" ;;
-            4) python3 -m venv venv && echo "venv создан" ;;
-            5) source venv/bin/activate && echo "Окружение активировано" ;;
+            1) python3 --version 2>/dev/null || echo "Не установлен"; read -p "$PRESS_ENTER" ;;
+            2) pip list 2>/dev/null || echo "pip не установлен"; read -p "$PRESS_ENTER" ;;
+            3) read -p "Пакет: " p; pip install "$p" 2>/dev/null || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            4) python3 -m venv venv && echo "Окружение создано" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
+            5) source venv/bin/activate && echo "Активировано" || echo "Ошибка"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+# ================== 14. СИСТЕМНАЯ ИНФОРМАЦИЯ ==================
 section_sysinfo() {
     clear
     echo "--- Системная информация ---"
@@ -591,37 +479,33 @@ section_sysinfo() {
     read -p "$PRESS_ENTER"
 }
 
+# ================== 15. УСТАНОВКА СТЕКА ==================
 section_install_stack() {
     while true; do
         clear
         echo "--- Установить Git, Docker, Python ---"
-        echo " 1. Установить Git"
-        echo " 2. Установить Docker"
-        echo " 3. Установить Python 3 + pip"
-        echo " 4. Установить всё вместе"
+        echo " 1. Git"
+        echo " 2. Docker"
+        echo " 3. Python 3 + pip"
+        echo " 4. Всё вместе"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
+        read -p "Выбор: " c
         case $c in
-            1) sudo apt update && sudo apt install -y git ;;
-            2) curl -fsSL https://get.docker.com | sudo sh ;;
-            3) sudo apt update && sudo apt install -y python3 python3-pip ;;
-            4) sudo apt update && sudo apt install -y git python3 python3-pip
-               curl -fsSL https://get.docker.com | sudo sh ;;
+            1) sudo apt update && sudo apt install -y git && echo "Готово"; read -p "$PRESS_ENTER" ;;
+            2) curl -fsSL https://get.docker.com | sudo sh && echo "Готово"; read -p "$PRESS_ENTER" ;;
+            3) sudo apt update && sudo apt install -y python3 python3-pip && echo "Готово"; read -p "$PRESS_ENTER" ;;
+            4) sudo apt update && sudo apt install -y git python3 python3-pip; curl -fsSL https://get.docker.com | sudo sh; echo "Готово"; read -p "$PRESS_ENTER" ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
 show_help() {
     clear
-    echo "Справочник охватывает самые частые задачи:"
-    echo "  файлы, поиск, права, архивы, сеть, процессы,"
-    echo "  ресурсы, пользователи, SSH, apt, Git, Docker, Python."
-    echo ""
-    echo "Все установщики и шпаргалки уже встроены."
-    echo "Чтобы предложить новую команду – пиши в проект."
+    echo "Это интерактивный помощник по Debian/Ubuntu."
+    echo "Выбирайте раздел и следуйте подсказкам."
+    echo "Все команды выполняются сразу."
     read -p "$PRESS_ENTER"
 }
 
