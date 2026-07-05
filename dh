@@ -1,0 +1,80 @@
+#!/bin/bash
+# DevOps Helper v2 (interactive menu) - Made by Vipman84
+
+if ! command -v whiptail &>/dev/null; then
+    sudo apt update && sudo apt install whiptail -y
+fi
+
+while true; do
+    MAIN=$(whiptail --title "DevOps Helper (dh)" --menu "Main Menu" 20 70 12 \
+        "1" "System" \
+        "2" "Network" \
+        "3" "Git" \
+        "4" "Package Management" \
+        "5" "Systemd Services" \
+        "6" "Disk & Memory" \
+        "7" "Users & Groups" \
+        "8" "Processes" \
+        "0" "Exit" 3>&1 1>&2 2>&3)
+
+    case $MAIN in
+        1) # System submenu
+            while true; do
+                SYS=$(whiptail --title "System" --menu "System Info" 15 60 5 \
+                    "1" "Uptime" \
+                    "2" "Kernel version" \
+                    "3" "Hostname" \
+                    "4" "Date" \
+                    "0" "Back" 3>&1 1>&2 2>&3)
+                case $SYS in
+                    1) uptime ;;
+                    2) uname -a ;;
+                    3) hostname ;;
+                    4) date ;;
+                    0) break ;;
+                    *) ;;
+                esac
+                whiptail --msgbox "Press Enter to continue" 8 40
+            done
+            ;;
+        2) # Network submenu
+            while true; do
+                NET=$(whiptail --title "Network" --menu "Network Tools" 15 60 5 \
+                    "1" "Ping google.com" \
+                    "2" "Trace route to google.com" \
+                    "3" "Show IP addresses" \
+                    "4" "Show listening ports" \
+                    "0" "Back" 3>&1 1>&2 2>&3)
+                case $NET in
+                    1) ping -c 4 google.com ;;
+                    2) traceroute google.com 2>/dev/null || echo "traceroute not installed" ;;
+                    3) ip -br addr ;;
+                    4) ss -tlnp ;;
+                    0) break ;;
+                    *) ;;
+                esac
+                whiptail --msgbox "Press Enter to continue" 8 40
+            done
+            ;;
+        3) # Git submenu (example)
+            whiptail --msgbox "Git commands (customize)" 8 40
+            ;;
+        4) # Package management
+            whiptail --msgbox "Apt commands (customize)" 8 40
+            ;;
+        5) # Systemd services
+            whiptail --msgbox "Systemd status (customize)" 8 40
+            ;;
+        6) # Disk & Memory
+            whiptail --msgbox "Free memory and disk (customize)" 8 40
+            ;;
+        7) # Users & Groups
+            whiptail --msgbox "User management (customize)" 8 40
+            ;;
+        8) # Processes
+            whiptail --msgbox "Process list (customize)" 8 40
+            ;;
+        0) break ;;
+        *) ;;
+    esac
+done
