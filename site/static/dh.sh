@@ -53,22 +53,168 @@ main_menu() {
 section_files() {
     while true; do
         clear
-        echo "--- Умные файлы и каталоги ---"
-        echo " 1. Рекурсивный поиск файлов"
-        echo " 2. Рекурсивный поиск каталогов"
-        echo " 3. Быстрый переход в каталог"
-        echo " 4. Создать файл/каталог"
-        echo " 0. $BACK"
-        read -p "Выберите действие: " fchoice
-        case $fchoice in
-            1) smart_find "файл" "f" ;;
-            2) smart_find "каталог" "d" ;;
-            3) quick_cd ;;
+        echo "--- Файлы и каталоги ---"
+        echo " 1. Посмотреть содержимое папки"
+        echo " 2. Поиск файлов по имени"
+        echo " 3. Перейти в другую папку"
+        echo " 4. Создать файл или папку"
+        echo " 5. Удалить файл или папку"
+        echo " 0. Назад"
+        read -p "Выберите действие: " choice
+        case $choice in
+            1) browse_directory ;;
+            2) search_files ;;
+            3) change_directory ;;
             4) create_item ;;
+            5) delete_item ;;
             0) break ;;
-            *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
+            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
         esac
     done
+}
+
+browse_directory() {
+    local dir="${1:-$(pwd)}"
+    clear
+    echo "=== Содержимое каталога: $dir ==="
+    echo ""
+    # Показываем содержимое с номерами
+    local i=1
+    declare -A items
+    while IFS= read -r item; do
+        if [ -d "$dir/$item" ]; then
+            echo "  [$i] 📁 $item/"
+        else
+            echo "  [$i] 📄 $item"
+        fi
+        items[$i]="$item"
+        ((i++))
+    done < <(ls -1A "$dir" 2>/dev/null)
+    echo ""
+    echo "Введите номер для действия (0 - выход, .. - вверх):"
+    read -p "> " num
+    
+    if [ "$num" = "0" ]; then
+        return
+    elif [ "$num" = ".." ]; then
+        cd .. && browse_directory "$(pwd)"
+    elif [ -n "${items[$num]}" ]; then
+        local target="$dir/${items[$num]}"
+        if [ -d "$target" ]; then
+            cd "$target" && browse_directory "$(pwd)"
+        else
+            show_file_actions "$target"
+        fi
+    else
+        echo "Неверный номер"
+        read -p "Нажмите Enter..."
+        browse_directory "$dir"
+    fi
+}
+
+show_file_actions() {
+    local file="$1"
+    clear
+    echo "Файл: $file"
+    echo "Размер: $(stat -c%s "$file") байт"
+    echo "Права: $(stat -c%a "$file")"
+    echo ""
+    echo " 1. Просмотреть (первые 20 строк)"
+    echo " 2. Редактировать (nano)"
+    echo " 3. Копировать в..."
+    echo " 4. Переместить в..."
+    echo " 0. Назад"
+    read -p "Выберите действие: " action
+    case $action in
+        1) head -20 "$file"; echo "..."; read -p "Нажмите Enter..." ;;
+        2) nano "$file" ;;
+        3) read -p "Куда скопировать: " dest; cp -v "$file" "$dest"; read -p "Нажмите Enter..." ;;
+        4) read -p "Куда переместить: " dest; mv -v "$file" "$dest"; read -p "Нажмите Enter..." ;;
+    esac
+}
+
+search_files() {
+    clear
+    echo "--- Поиск файлов ---"
+    read -p "Введите имя или часть имени файла: " pattern
+    echo "Ищем файлы по шаблону **..."
+    echo ""
+    local results=$(find / -name "*$pattern*" -type f 2>/dev/null | head -20)
+    if [ -z "$results" ]; then
+        echo "Ничего не найдено."
+        read -p "Нажмите Enter..."
+        return
+    fi
+    
+    local i=1
+    declare -A found
+    while IFS= read -r file; do
+        echo "  [$i] $file"
+        found[$i]="$file"
+        ((i++))
+    done <<< "$results"
+    echo ""
+    read -p "Выберите номер для просмотра (0 - отмена): " num
+    if [ "$num" -gt 0 ] && [ -n "${found[$num]}" ]; then
+        show_file_actions "${found[$num]}"
+    fi
+}
+
+change_directory() {
+    clear
+    echo "--- Смена каталога ---"
+    echo "Текущий каталог: $(pwd)"
+    echo ""
+    echo "Часто используемые каталоги:"
+    echo "  /home       - домашние папки пользователей"
+    echo "  /var/log    - системные логи"
+    echo "  /etc        - конфигурационные файлы"
+    echo "  /tmp        - временные файлы"
+    echo "  /opt        - дополнительное ПО"
+    echo ""
+    echo " 1. Выбрать из списка выше"
+    echo " 2. Ввести путь вручную"
+    echo " 0. Отмена"
+    read -p "Выбор: " choice
+    
+    case $choice in
+        1) read -p "Введите номер каталога из списка: " dir_choice
+           case $dir_choice in
+               /home) cd /home ;;
+               /var/log) cd /var/log ;;
+               /etc) cd /etc ;;
+               /tmp) cd /tmp ;;
+               /opt) cd /opt ;;
+               *) echo "Неверный каталог"; read -p "Нажмите Enter..."; return ;;
+           esac
+           browse_directory "$(pwd)" ;;
+        2) read -p "Введите путь: " new_path
+           if [ -d "$new_path" ]; then
+               cd "$new_path" && echo "Перешли в $(pwd)"
+               browse_directory "$(pwd)"
+           else
+               echo "Каталог не существует"
+               read -p "Нажмите Enter..."
+           fi ;;
+    esac
+}
+
+delete_item() {
+    clear
+    echo "--- Удаление файла или папки ---"
+    read -p "Введите путь к файлу/папке для удаления: " target
+    if [ -e "$target" ]; then
+        echo "Вы уверены, что хотите удалить ? (да/нет)"
+        read -p "> " confirm
+        if [ "$confirm" = "да" ]; then
+            rm -rf "$target" && echo "Удалено" || echo "Ошибка при удалении"
+        else
+            echo "Отменено"
+        fi
+    else
+        echo "Файл или папка не найдены"
+    fi
+    read -p "Нажмите Enter..."
 }
 
 smart_find() {
