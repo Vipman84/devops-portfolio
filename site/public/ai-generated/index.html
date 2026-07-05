@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Звёздное небо</title>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 1s infinite;
+        }
+
+        @keyframes twinkle {
+            0% {
+                transform: translateX(100%) rotate(-180deg);
+            }
+            20% {
+                transform: translateX(0) rotate(-180deg);
+            }
+            40% {
+                transform: translateX(50%) rotate(0deg);
+            }
+            60% {
+                transform: translateX(0) rotate(0deg);
+            }
+            80% {
+                transform: translateX(-50%) rotate(180deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(-180deg);
+            }
+        }
+
+        .falling-star {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: fall 2s infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateX(100%) rotate(-180deg);
+            }
+            20% {
+                transform: translateX(-100px) rotate(-180deg);
+            }
+            40% {
+                transform: translateX(-50px) rotate(0deg);
+            }
+            60% {
+                transform: translateX(-100px) rotate(0deg);
+            }
+            80% {
+                transform: translateX(-25px) rotate(180deg);
+            }
+            100% {
+                transform: translateX(0) rotate(180deg);
+            }
+        }
+
+        .cloud {
+            position: absolute;
+            width: 200px;
+            height: 100px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: drift 5s infinite;
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-200px);
+            }
+            40% {
+                transform: translateX(-100px);
+            }
+            60% {
+                transform: translateX(50px);
+            }
+            80% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .cloud::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 20px;
+            background-color: #fff;
+            border-radius: 10%;
+            animation: wave 3s infinite;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translateX(-25px);
+            }
+            20% {
+                transform: translateX(25px);
+            }
+            40% {
+                transform: translateX(0);
+            }
+            60% {
+                transform: translateX(-25px);
+            }
+            80% {
+                transform: translateX(-50px);
+            }
+            100% {
+                transform: translateX(-25px);
+            }
+        }
+
+        .cloud::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0% {
+                transform: translateX(-10px);
+            }
+            20% {
+                transform: translateX(5px);
+            }
+            40% {
+                transform: translateX(-2.5px);
+            }
+            60% {
+                transform: translateX(-7.5px);
+            }
+            80% {
+                transform: translateX(-10px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cloud"></div>
+    <div class="star" style="left: 50px; top: 40px;"></div>
+    <div class="star" style="left: 80px; top: 30px;"></div>
+    <div class="falling-star" style="left: 20px; top: 60px;"></div>
+    <div class="cloud" style="left: 150px; top: 70px;">
+        <div class="cloud::before"></div>
+        <div class="cloud::after"></div>
+    </div>
+</body>
+</html>
