@@ -4,12 +4,7 @@
 #  Made by Vipman84  |  https://devops.ai-donate.ru
 # ===================================================================
 
-# ---------- настройки ----------
 set -o pipefail
-BOLD="\033[1m"
-GREEN="\033[32m"
-CYAN="\033[36m"
-RESET="\033[0m"
 
 # ---------- мультиязычность ----------
 if [[ "${LANG:0:2}" == "ru" ]]; then
@@ -34,7 +29,7 @@ main_menu() {
     echo "+========================================+"
     echo "|        $TITLE           |"
     echo "+========================================+"
-    echo "|  1. Файлы и каталоги                  |"
+    echo "|  1. Файлы и каталоги (УМНЫЙ)          |"
     echo "|  2. Поиск и фильтрация                |"
     echo "|  3. Права и владельцы                 |"
     echo "|  4. Архивация и сжатие                |"
@@ -54,52 +49,110 @@ main_menu() {
     echo "+========================================+"
 }
 
-# ---------- разделы ----------
+# ================== УМНЫЙ РАЗДЕЛ «ФАЙЛЫ И КАТАЛОГИ» ==================
 section_files() {
     while true; do
         clear
-        echo "--- Файлы и каталоги ---"
-        echo " 1. ls -la            — подробный список"
-        echo " 2. cd <путь>         — перейти в папку"
-        echo " 3. pwd               — где я сейчас"
-        echo " 4. cp <откуда> <куда> — копировать файл"
-        echo " 5. mv <откуда> <куда> — переместить/переименовать"
-        echo " 6. rm <файл>         — удалить файл"
-        echo " 7. mkdir <папка>     — создать папку"
-        echo " 8. touch <файл>      — создать пустой файл"
-        echo " 9. cat <файл>        — просмотр файла"
-        echo "10. head / tail <файл> — начало / конец файла"
-        echo "11. find . -name ...  — поиск файлов"
+        echo "--- Умные файлы и каталоги ---"
+        echo " 1. Рекурсивный поиск файлов"
+        echo " 2. Рекурсивный поиск каталогов"
+        echo " 3. Быстрый переход в каталог"
+        echo " 4. Создать файл/каталог"
         echo " 0. $BACK"
-        read -p "$CHOOSE: " c
-        case $c in
-            1) ls -la ;;
-            2) read -p "Путь: " p; cd "$p" && pwd ;;
-            3) pwd ;;
-            4) read -p "Откуда: " s; read -p "Куда: " d; cp -v "$s" "$d" ;;
-            5) read -p "Откуда: " s; read -p "Куда: " d; mv -v "$s" "$d" ;;
-            6) read -p "Файл: " f; rm -v "$f" ;;
-            7) read -p "Папка: " d; mkdir -pv "$d" ;;
-            8) read -p "Имя: " f; touch "$f" ;;
-            9) read -p "Файл: " f; cat "$f" ;;
-            10) read -p "Файл: " f; head -5 "$f"; echo "..."; tail -5 "$f" ;;
-            11) read -p "Шаблон имени: " n; find . -name "$n" 2>/dev/null ;;
+        read -p "Выберите действие: " fchoice
+        case $fchoice in
+            1) smart_find "файл" "f" ;;
+            2) smart_find "каталог" "d" ;;
+            3) quick_cd ;;
+            4) create_item ;;
             0) break ;;
             *) echo "$WRONG"; read -p "$PRESS_ENTER" ;;
         esac
-        read -p "$PRESS_ENTER"
     done
 }
 
+smart_find() {
+    local type="$1"
+    local type_flag="$2"
+    local start_dir="/"
+    
+    read -p "Начальный каталог (по умолчанию /): " start_dir
+    start_dir="${start_dir:-/}"
+    read -p "Маска имени (например, *.log): " mask
+    mask="${mask:-*}"
+
+    echo "Поиск $type в $start_dir по маске '$mask'..."
+    local results
+    results=$(find "$start_dir" -type "$type_flag" -name "$mask" 2>/dev/null | head -20)
+    
+    if [ -z "$results" ]; then
+        echo "Ничего не найдено."
+        read -p "$PRESS_ENTER"
+        return
+    fi
+
+    local IFS=$'\n'
+    local -a arr=($results)
+    for i in "${!arr[@]}"; do
+        printf "%3d. %s\n" $((i+1)) "${arr[$i]}"
+    done
+
+    read -p "Выберите номер (0 – отмена): " num
+    if [ "$num" -gt 0 ] && [ "$num" -le "${#arr[@]}" ]; then
+        local target="${arr[$((num-1))]}"
+        echo "Выбран: $target"
+        echo " 1. Просмотреть (cat)"
+        echo " 2. Редактировать (nano)"
+        echo " 3. Копировать в..."
+        echo " 4. Удалить"
+        echo " 5. Архивировать (tar.gz)"
+        echo " 0. Отмена"
+        read -p "Действие: " act
+        case $act in
+            1) cat "$target" | less ;;
+            2) nano "$target" ;;
+            3) read -p "Куда скопировать: " dest; cp -v "$target" "$dest" ;;
+            4) rm -iv "$target" ;;
+            5) tar -czf "${target}.tar.gz" "$target" && echo "Архив создан: ${target}.tar.gz" ;;
+            0) return ;;
+            *) echo "Неверное действие" ;;
+        esac
+    fi
+    read -p "$PRESS_ENTER"
+}
+
+quick_cd() {
+    read -p "Введите путь: " newdir
+    if [ -d "$newdir" ]; then
+        cd "$newdir" && echo "Текущий каталог: $(pwd)"
+    else
+        echo "Каталог не существует."
+    fi
+    read -p "$PRESS_ENTER"
+}
+
+create_item() {
+    echo "Создать: 1 – файл, 2 – каталог"
+    read -p "Выбор: " ctype
+    read -p "Имя: " name
+    case $ctype in
+        1) touch "$name" && echo "Файл $name создан" ;;
+        2) mkdir -p "$name" && echo "Каталог $name создан" ;;
+        *) echo "Неверный выбор" ;;
+    esac
+    read -p "$PRESS_ENTER"
+}
+
+# ================== ОСТАЛЬНЫЕ РАЗДЕЛЫ (без изменений) ==================
 section_search() {
     while true; do
         clear
         echo "--- Поиск и фильтрация ---"
-        echo " 1. grep <слово> <файл>      — найти строку"
-        echo " 2. grep -r <слово> <папка>  — рекурсивный поиск"
-        echo " 3. find . -name ...         — найти файл по имени"
-        echo " 4. find . -mtime -7         — изменённые за 7 дней"
-        echo " 5. find . -size +10M        — больше 10 МБ"
+        echo " 1. grep <слово> <файл>"
+        echo " 2. grep -r <слово> <папка>"
+        echo " 3. find . -name ..."
+        echo " 4. find . -mtime -7"
+        echo " 5. find . -size +10M"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
@@ -119,10 +172,10 @@ section_perms() {
     while true; do
         clear
         echo "--- Права и владельцы ---"
-        echo " 1. chmod +x <файл>     — сделать исполняемым"
-        echo " 2. chmod 755 <файл>    — rwxr-xr-x"
-        echo " 3. chown user:group <ф>— сменить владельца"
-        echo " 4. ls -l               — показать права"
+        echo " 1. chmod +x <файл>"
+        echo " 2. chmod 755 <файл>"
+        echo " 3. chown user:group <ф>"
+        echo " 4. ls -l"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
@@ -163,12 +216,12 @@ section_network() {
     while true; do
         clear
         echo "--- Сеть и диагностика ---"
-        echo " 1. ip a                — IP-адреса"
-        echo " 2. ping <хост>         — проверка связи"
-        echo " 3. ss -tlnp            — открытые порты"
-        echo " 4. curl -I <url>       — заголовки HTTP"
-        echo " 5. traceroute <хост>   — трассировка"
-        echo " 6. nslookup <домен>    — DNS-запрос"
+        echo " 1. ip a"
+        echo " 2. ping <хост>"
+        echo " 3. ss -tlnp"
+        echo " 4. curl -I <url>"
+        echo " 5. traceroute <хост>"
+        echo " 6. nslookup <домен>"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
@@ -189,11 +242,11 @@ section_processes() {
     while true; do
         clear
         echo "--- Процессы и службы ---"
-        echo " 1. top / htop          — монитор процессов"
-        echo " 2. ps aux              — все процессы"
-        echo " 3. kill <PID>          — завершить процесс"
-        echo " 4. systemctl status    — статус службы"
-        echo " 5. journalctl -u <svc> — логи службы"
+        echo " 1. top -n 1"
+        echo " 2. ps aux"
+        echo " 3. kill <PID>"
+        echo " 4. systemctl status"
+        echo " 5. journalctl -u <svc>"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
@@ -213,11 +266,11 @@ section_resources() {
     while true; do
         clear
         echo "--- Память / диск / загрузка ---"
-        echo " 1. free -h             — память"
-        echo " 2. df -h               — диски"
-        echo " 3. du -sh <папка>      — размер папки"
-        echo " 4. uptime              — время работы"
-        echo " 5. uname -a            — версия ядра"
+        echo " 1. free -h"
+        echo " 2. df -h"
+        echo " 3. du -sh <папка>"
+        echo " 4. uptime"
+        echo " 5. uname -a"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
@@ -237,11 +290,11 @@ section_users() {
     while true; do
         clear
         echo "--- Пользователи и группы ---"
-        echo " 1. whoami              — кто я"
-        echo " 2. id                  — мои группы"
-        echo " 3. cat /etc/passwd     — список пользователей"
-        echo " 4. useradd / userdel   — добавить/удалить"
-        echo " 5. passwd              — сменить пароль"
+        echo " 1. whoami"
+        echo " 2. id"
+        echo " 3. cat /etc/passwd"
+        echo " 4. useradd / userdel"
+        echo " 5. passwd"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
@@ -262,10 +315,10 @@ section_ssh() {
     while true; do
         clear
         echo "--- SSH и удалённая работа ---"
-        echo " 1. ssh user@host       — подключиться"
-        echo " 2. ssh-keygen          — создать ключ"
-        echo " 3. ssh-copy-id user@host — скопировать ключ"
-        echo " 4. scp файл user@host: — передать файл"
+        echo " 1. ssh user@host"
+        echo " 2. ssh-keygen"
+        echo " 3. ssh-copy-id"
+        echo " 4. scp файл user@host:"
         echo " 0. $BACK"
         read -p "$CHOOSE: " c
         case $c in
