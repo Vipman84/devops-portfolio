@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+        }
+        
+        .point {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            background-color: #fff;
+            animation: point 1s infinite linear;
+        }
+        
+        @keyframes point {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-200%) rotate(360deg);
+            }
+        }
+        
+        .star {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: star 5s infinite linear;
+        }
+        
+        @keyframes star {
+            0% {
+                transform: translateX(200%) rotate(0deg);
+            }
+            100% {
+                transform: translateX(-300%) rotate(360deg);
+            }
+        }
+        
+        .sparkle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            background-color: #fff;
+            animation: sparkle 0.5s infinite linear;
+        }
+        
+        @keyframes sparkle {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="point"></div>
+    <div class="point"></div>
+    <div class="star"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <div class="sparkle"></div>
+    <!-- Add more points, stars and sparkles here -->
+</body>
+</html>
