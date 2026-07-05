@@ -415,7 +415,6 @@ section_apt() {
     done
 }
 
-install_popular_packages() {
     clear
     echo "--- Популярные пакеты ---"
     echo " 1. htop           — удобный монитор процессов (лучше, чем top)"
@@ -703,3 +702,82 @@ while true; do
         *) echo "Неверный раздел"; read -p "Нажмите Enter..." ;;
     esac
 done
+
+section_apt() {
+    while true; do
+        clear
+        echo "--- Установка пакетов (apt) ---"
+        echo " 1. Показать популярные пакеты (с описанием)"
+        echo " 2. Установить пакет (ввести название вручную)"
+        echo " 3. Обновить список пакетов (apt update)"
+        echo " 4. Обновить систему (apt upgrade)"
+        echo " 5. Удалить пакет"
+        echo " 6. Поиск пакетов по ключевому слову"
+        echo " 0. Назад"
+        read -p "Выберите действие: " apt_choice
+        case $apt_choice in
+            1) install_popular_packages ;;
+            2) read -p "Введите название пакета: " pkg; sudo apt install -y "$pkg"; read -p "Нажмите Enter..." ;;
+            3) sudo apt update; read -p "Нажмите Enter..." ;;
+            4) sudo apt upgrade -y; read -p "Нажмите Enter..." ;;
+            5) read -p "Введите название пакета для удаления: " pkg; sudo apt remove -y "$pkg"; read -p "Нажмите Enter..." ;;
+            6) read -p "Введите ключевое слово: " keyword; apt search "$keyword" 2>/dev/null | head -20; read -p "Нажмите Enter..." ;;
+            0) break ;;
+            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
+        esac
+    done
+}
+
+install_popular_packages() {
+    clear
+    echo "--- Популярные пакеты ---"
+    echo "Выберите номер для установки (или 0 для возврата):"
+    echo ""
+    echo "  1. htop           — монитор процессов (удобнее, чем top)"
+    echo "  2. git            — система контроля версий"
+    echo "  3. curl           — HTTP-клиент, скачивание файлов"
+    echo "  4. wget           — загрузка файлов из интернета"
+    echo "  5. vim            — мощный текстовый редактор"
+    echo "  6. nano           — простой текстовый редактор"
+    echo "  7. mc             — файловый менеджер Midnight Commander"
+    echo "  8. build-essential — компиляторы (gcc, make) для сборки ПО"
+    echo "  9. python3-pip    — менеджер пакетов Python"
+    echo " 10. nodejs         — среда выполнения JavaScript"
+    echo " 11. docker.io      — платформа для контейнеров"
+    echo " 12. nginx          — веб-сервер и обратный прокси"
+    echo " 13. apache2        — веб-сервер Apache"
+    echo " 14. postgresql     — реляционная база данных"
+    echo " 15. redis          — кэш-сервер (in-memory)"
+    echo " 16. htop           — монитор процессов"
+    echo " 17. neofetch       — красивая информация о системе"
+    echo " 18. tldr           — упрощённые подсказки по командам"
+    echo " 19. jq             — обработка JSON в командной строке"
+    echo " 20. unzip          — распаковка ZIP-архивов"
+    echo ""
+    read -p "Ваш выбор: " pkg_num
+    case $pkg_num in
+        1) sudo apt install -y htop ;;
+        2) sudo apt install -y git ;;
+        3) sudo apt install -y curl ;;
+        4) sudo apt install -y wget ;;
+        5) sudo apt install -y vim ;;
+        6) sudo apt install -y nano ;;
+        7) sudo apt install -y mc ;;
+        8) sudo apt install -y build-essential ;;
+        9) sudo apt install -y python3-pip ;;
+        10) sudo apt install -y nodejs ;;
+        11) sudo apt install -y docker.io ;;
+        12) sudo apt install -y nginx ;;
+        13) sudo apt install -y apache2 ;;
+        14) sudo apt install -y postgresql ;;
+        15) sudo apt install -y redis ;;
+        16) sudo apt install -y htop ;;
+        17) sudo apt install -y neofetch ;;
+        18) sudo apt install -y tldr ;;
+        19) sudo apt install -y jq ;;
+        20) sudo apt install -y unzip ;;
+        0) return ;;
+        *) echo "Неверный номер"; read -p "Нажмите Enter..." ;;
+    esac
+    read -p "Нажмите Enter..."
+}
