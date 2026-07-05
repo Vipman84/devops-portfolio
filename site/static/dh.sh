@@ -1,6 +1,6 @@
 #!/bin/bash
-# DevOps Helper (dh) - интерактивный справочник с описаниями
-# Made by Vipman84 | https://devops.ai-donate.ru
+# DevOps Helper (dh) — интерактивный справочник команд Debian/Ubuntu
+# Made by Vipman84  |  https://devops.ai-donate.ru
 
 set -o pipefail
 
@@ -47,14 +47,14 @@ main_menu() {
     echo "+========================================+"
 }
 
-# ================== РАЗДЕЛ «ФАЙЛЫ И КАТАЛОГИ» (с описаниями) ==================
+# ================== РАЗДЕЛ «ФАЙЛЫ И КАТАЛОГИ» ==================
 section_files() {
     while true; do
         clear
         echo "--- Файлы и каталоги ---"
-        echo " 1. Посмотреть содержимое папки — показывает файлы и подпапки, можно переходить внутрь"
-        echo " 2. Поиск файлов по имени — поиск по всей системе"
-        echo " 3. Перейти в другую папку — список популярных каталогов или ручной ввод"
+        echo " 1. Посмотреть содержимое папки"
+        echo " 2. Поиск файлов по имени"
+        echo " 3. Перейти в другую папку"
         echo " 4. Создать файл или папку"
         echo " 5. Удалить файл или папку"
         echo " 0. Назад"
@@ -75,7 +75,6 @@ browse_directory() {
     local dir="${1:-$(pwd)}"
     clear
     echo "=== Содержимое каталога: $dir ==="
-    echo "  (📁 = папка, 📄 = файл)"
     echo ""
     local i=1
     declare -A items
@@ -208,12 +207,12 @@ delete_item() {
     read -p "Нажмите Enter..."
 }
 
-# ================== РАЗДЕЛ «ПРОЦЕССЫ И СЛУЖБЫ» (с описаниями) ==================
+# ================== РАЗДЕЛ «ПРОЦЕССЫ И СЛУЖБЫ» ==================
 section_processes() {
     while true; do
         clear
         echo "--- Процессы и службы ---"
-        echo " 1. Показать запущенные службы (с описанием, можно управлять)"
+        echo " 1. Показать запущенные службы (с выбором)"
         echo " 2. Посмотреть логи службы"
         echo " 3. Показать все процессы"
         echo " 4. Завершить процесс"
@@ -235,8 +234,6 @@ section_processes() {
 list_and_manage_services() {
     clear
     echo "--- Активные службы ---"
-    echo ""
-    # Получаем список активных служб с описанием
     local services=$(systemctl list-units --type=service --state=running --no-legend | awk '{print $1}' | head -20)
     if [ -z "$services" ]; then
         echo "Нет запущенных служб."
@@ -247,7 +244,6 @@ list_and_manage_services() {
     local i=1
     declare -A svc_list
     while IFS= read -r svc; do
-        # Получаем описание службы
         local desc=$(systemctl show -p Description "$svc" 2>/dev/null | cut -d= -f2)
         echo "  [$i] $svc — ${desc:-нет описания}"
         svc_list[$i]="$svc"
@@ -290,15 +286,15 @@ view_service_logs() {
     read -p "Нажмите Enter..."
 }
 
-# ================== РАЗДЕЛ «ПОЛЬЗОВАТЕЛИ И ГРУППЫ» (с описаниями) ==================
+# ================== РАЗДЕЛ «ПОЛЬЗОВАТЕЛИ И ГРУППЫ» ==================
 section_users() {
     while true; do
         clear
         echo "--- Пользователи и группы ---"
-        echo " 1. Показать всех пользователей (обычные и системные)"
-        echo " 2. Добавить пользователя (создать нового)"
+        echo " 1. Показать всех пользователей"
+        echo " 2. Добавить пользователя"
         echo " 3. Удалить пользователя"
-        echo " 4. Сменить пароль (свой или другого пользователя)"
+        echo " 4. Сменить пароль"
         echo " 5. Информация о текущем пользователе"
         echo " 0. Назад"
         read -p "Выберите действие: " user_choice
@@ -330,113 +326,10 @@ section_users() {
 list_users() {
     clear
     echo "--- Список пользователей ---"
-    echo ""
-    echo "Обычные пользователи (UID >= 1000):"
     awk -F: '$3 >= 1000 && $1 != "nobody" { printf "  %-15s UID:%-5s Домашний: %s\n", $1, $3, $6 }' /etc/passwd
     echo ""
     echo "Системные пользователи (UID < 1000):"
-    awk -F: '$3 < 1000 && $1 != "root" { printf "  %-15s UID:%-5s — %s\n", $1, $3, "системный" }' /etc/passwd | head -10
-    echo ""
-    echo "Пояснение:"
-    echo "  Обычные пользователи — это люди, которые входят в систему."
-    echo "  Системные пользователи — служебные учётные записи для работы служб."
-    read -p "Нажмите Enter..."
-}
-
-# ================== РАЗДЕЛ «СЕТЬ» (с описаниями) ==================
-section_network() {
-    while true; do
-        clear
-        echo "--- Сеть и диагностика ---"
-        echo " 1. Показать сетевые интерфейсы (IP-адреса, состояние)"
-        echo " 2. Проверить доступность хоста (ping)"
-        echo " 3. Показать открытые порты (какие службы слушают)"
-        echo " 4. Проверить HTTP-заголовки (curl)"
-        echo " 5. Трассировка маршрута (traceroute)"
-        echo " 6. DNS-запрос (nslookup)"
-        echo " 0. Назад"
-        read -p "Выберите действие: " net_choice
-        case $net_choice in
-            1) echo "--- Сетевые интерфейсы ---"
-               echo "lo    — локальный интерфейс (внутренняя петля)"
-               echo "eth0  — обычно проводной Ethernet"
-               echo "wlan0 — обычно Wi-Fi"
-               echo ""
-               ip -br addr; read -p "Нажмите Enter..." ;;
-            2) read -p "Введите хост (по умолчанию google.com): " host
-               host="${host:-google.com}"
-               ping -c 4 "$host"
-               read -p "Нажмите Enter..." ;;
-            3) ss -tlnp
-               echo ""
-               echo "Пояснение:"
-               echo "LISTEN — порт слушается, ожидает подключений"
-               echo "ESTAB — установлено активное соединение"
-               read -p "Нажмите Enter..." ;;
-            4) read -p "Введите URL (по умолчанию https://example.com): " url
-               url="${url:-https://example.com}"
-               curl -I "$url" 2>/dev/null || echo "Не удалось подключиться"
-               read -p "Нажмите Enter..." ;;
-            5) read -p "Введите хост: " host
-               traceroute "$host" 2>/dev/null || echo "traceroute не установлен (apt install traceroute)"
-               read -p "Нажмите Enter..." ;;
-            6) read -p "Введите домен: " domain
-               nslookup "$domain" 2>/dev/null || echo "nslookup не установлен (apt install dnsutils)"
-               read -p "Нажмите Enter..." ;;
-            0) break ;;
-            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
-        esac
-    done
-}
-
-# ================== РАЗДЕЛ «УСТАНОВКА ПАКЕТОВ (apt)» (с описаниями) ==================
-section_apt() {
-    while true; do
-        clear
-        echo "--- Установка пакетов (apt) ---"
-        echo " 1. Обновить список пакетов (apt update) — проверяет наличие новых версий"
-        echo " 2. Обновить систему (apt upgrade) — устанавливает все обновления"
-        echo " 3. Установить популярные пакеты — список самых востребованных"
-        echo " 4. Установить свой пакет — ввести название вручную"
-        echo " 5. Удалить пакет — удалить ненужную программу"
-        echo " 6. Поиск пакетов — найти пакет по ключевому слову"
-        echo " 0. Назад"
-        read -p "Выберите действие: " apt_choice
-        case $apt_choice in
-            1) sudo apt update; read -p "Нажмите Enter..." ;;
-            2) sudo apt upgrade -y; read -p "Нажмите Enter..." ;;
-            3) install_popular_packages ;;
-            4) read -p "Введите название пакета: " pkg; sudo apt install -y "$pkg"; read -p "Нажмите Enter..." ;;
-            5) read -p "Введите название пакета: " pkg; sudo apt remove -y "$pkg"; read -p "Нажмите Enter..." ;;
-            6) read -p "Введите ключевое слово: " keyword; apt search "$keyword" 2>/dev/null | head -20; read -p "Нажмите Enter..." ;;
-            0) break ;;
-            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
-        esac
-    done
-}
-
-    clear
-    echo "--- Популярные пакеты ---"
-    echo " 1. htop           — удобный монитор процессов (лучше, чем top)"
-    echo " 2. git            — система контроля версий"
-    echo " 3. curl           — утилита для HTTP-запросов и скачивания файлов"
-    echo " 4. vim            — мощный текстовый редактор"
-    echo " 5. build-essential — компиляторы (gcc, make) для сборки ПО"
-    echo " 6. python3-pip    — менеджер пакетов для Python"
-    echo " 7. nodejs         — среда выполнения JavaScript (серверная)"
-    echo " 8. docker.io      — платформа для контейнеров"
-    echo " 0. Назад"
-    read -p "Выберите номер пакета: " pkg_choice
-    case $pkg_choice in
-        1) sudo apt install -y htop ;;
-        2) sudo apt install -y git ;;
-        3) sudo apt install -y curl ;;
-        4) sudo apt install -y vim ;;
-        5) sudo apt install -y build-essential ;;
-        6) sudo apt install -y python3-pip ;;
-        7) sudo apt install -y nodejs ;;
-        8) sudo apt install -y docker.io ;;
-    esac
+    awk -F: '$3 < 1000 && $1 != "root" { printf "  %-15s UID:%-5s\n", $1, $3 }' /etc/passwd | head -10
     read -p "Нажмите Enter..."
 }
 
@@ -509,6 +402,32 @@ section_archive() {
     done
 }
 
+section_network() {
+    while true; do
+        clear
+        echo "--- Сеть и диагностика ---"
+        echo " 1. ip a"
+        echo " 2. ping <хост>"
+        echo " 3. ss -tlnp"
+        echo " 4. curl -I <url>"
+        echo " 5. traceroute <хост>"
+        echo " 6. nslookup <домен>"
+        echo " 0. Назад"
+        read -p "Выберите действие: " c
+        case $c in
+            1) ip -br addr ;;
+            2) read -p "Хост: " h; ping -c 4 "$h" ;;
+            3) ss -tlnp ;;
+            4) read -p "URL: " u; curl -I "$u" ;;
+            5) read -p "Хост: " h; traceroute "$h" 2>/dev/null || echo "traceroute не установлен" ;;
+            6) read -p "Домен: " d; nslookup "$d" 2>/dev/null || echo "nslookup не установлен" ;;
+            0) break ;;
+            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
+        esac
+        read -p "Нажмите Enter..."
+    done
+}
+
 section_resources() {
     while true; do
         clear
@@ -548,6 +467,30 @@ section_ssh() {
             2) ssh-keygen -t ed25519 ;;
             3) read -p "Строка: " conn; ssh-copy-id $conn ;;
             4) read -p "Файл: " f; read -p "Куда: " dest; scp "$f" "$dest" ;;
+            0) break ;;
+            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
+        esac
+        read -p "Нажмите Enter..."
+    done
+}
+
+section_apt() {
+    while true; do
+        clear
+        echo "--- Установка пакетов (apt) ---"
+        echo " 1. apt update"
+        echo " 2. apt upgrade"
+        echo " 3. apt install <пакет>"
+        echo " 4. apt remove <пакет>"
+        echo " 5. apt search <слово>"
+        echo " 0. Назад"
+        read -p "Выберите действие: " c
+        case $c in
+            1) sudo apt update ;;
+            2) sudo apt upgrade -y ;;
+            3) read -p "Пакет: " p; sudo apt install -y "$p" ;;
+            4) read -p "Пакет: " p; sudo apt remove -y "$p" ;;
+            5) read -p "Слово: " w; apt search "$w" ;;
             0) break ;;
             *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
         esac
@@ -647,9 +590,9 @@ section_install_stack() {
     while true; do
         clear
         echo "--- Установить Git, Docker, Python ---"
-        echo " 1. Установить Git — система контроля версий"
-        echo " 2. Установить Docker — платформа для контейнеров"
-        echo " 3. Установить Python 3 + pip — язык программирования и менеджер пакетов"
+        echo " 1. Установить Git"
+        echo " 2. Установить Docker"
+        echo " 3. Установить Python 3 + pip"
         echo " 4. Установить всё вместе"
         echo " 0. Назад"
         read -p "Выберите действие: " c
@@ -702,82 +645,3 @@ while true; do
         *) echo "Неверный раздел"; read -p "Нажмите Enter..." ;;
     esac
 done
-
-section_apt() {
-    while true; do
-        clear
-        echo "--- Установка пакетов (apt) ---"
-        echo " 1. Показать популярные пакеты (с описанием)"
-        echo " 2. Установить пакет (ввести название вручную)"
-        echo " 3. Обновить список пакетов (apt update)"
-        echo " 4. Обновить систему (apt upgrade)"
-        echo " 5. Удалить пакет"
-        echo " 6. Поиск пакетов по ключевому слову"
-        echo " 0. Назад"
-        read -p "Выберите действие: " apt_choice
-        case $apt_choice in
-            1) install_popular_packages ;;
-            2) read -p "Введите название пакета: " pkg; sudo apt install -y "$pkg"; read -p "Нажмите Enter..." ;;
-            3) sudo apt update; read -p "Нажмите Enter..." ;;
-            4) sudo apt upgrade -y; read -p "Нажмите Enter..." ;;
-            5) read -p "Введите название пакета для удаления: " pkg; sudo apt remove -y "$pkg"; read -p "Нажмите Enter..." ;;
-            6) read -p "Введите ключевое слово: " keyword; apt search "$keyword" 2>/dev/null | head -20; read -p "Нажмите Enter..." ;;
-            0) break ;;
-            *) echo "Неверный выбор"; read -p "Нажмите Enter..." ;;
-        esac
-    done
-}
-
-install_popular_packages() {
-    clear
-    echo "--- Популярные пакеты ---"
-    echo "Выберите номер для установки (или 0 для возврата):"
-    echo ""
-    echo "  1. htop           — монитор процессов (удобнее, чем top)"
-    echo "  2. git            — система контроля версий"
-    echo "  3. curl           — HTTP-клиент, скачивание файлов"
-    echo "  4. wget           — загрузка файлов из интернета"
-    echo "  5. vim            — мощный текстовый редактор"
-    echo "  6. nano           — простой текстовый редактор"
-    echo "  7. mc             — файловый менеджер Midnight Commander"
-    echo "  8. build-essential — компиляторы (gcc, make) для сборки ПО"
-    echo "  9. python3-pip    — менеджер пакетов Python"
-    echo " 10. nodejs         — среда выполнения JavaScript"
-    echo " 11. docker.io      — платформа для контейнеров"
-    echo " 12. nginx          — веб-сервер и обратный прокси"
-    echo " 13. apache2        — веб-сервер Apache"
-    echo " 14. postgresql     — реляционная база данных"
-    echo " 15. redis          — кэш-сервер (in-memory)"
-    echo " 16. htop           — монитор процессов"
-    echo " 17. neofetch       — красивая информация о системе"
-    echo " 18. tldr           — упрощённые подсказки по командам"
-    echo " 19. jq             — обработка JSON в командной строке"
-    echo " 20. unzip          — распаковка ZIP-архивов"
-    echo ""
-    read -p "Ваш выбор: " pkg_num
-    case $pkg_num in
-        1) sudo apt install -y htop ;;
-        2) sudo apt install -y git ;;
-        3) sudo apt install -y curl ;;
-        4) sudo apt install -y wget ;;
-        5) sudo apt install -y vim ;;
-        6) sudo apt install -y nano ;;
-        7) sudo apt install -y mc ;;
-        8) sudo apt install -y build-essential ;;
-        9) sudo apt install -y python3-pip ;;
-        10) sudo apt install -y nodejs ;;
-        11) sudo apt install -y docker.io ;;
-        12) sudo apt install -y nginx ;;
-        13) sudo apt install -y apache2 ;;
-        14) sudo apt install -y postgresql ;;
-        15) sudo apt install -y redis ;;
-        16) sudo apt install -y htop ;;
-        17) sudo apt install -y neofetch ;;
-        18) sudo apt install -y tldr ;;
-        19) sudo apt install -y jq ;;
-        20) sudo apt install -y unzip ;;
-        0) return ;;
-        *) echo "Неверный номер"; read -p "Нажмите Enter..." ;;
-    esac
-    read -p "Нажмите Enter..."
-}
